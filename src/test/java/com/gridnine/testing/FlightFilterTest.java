@@ -13,7 +13,7 @@ public class FlightFilterTest {
     final LocalDateTime dateTime = LocalDateTime.parse("2021-01-01T00:00");
 
     @Test
-    public void excludeByDeparture(){
+    public void filterByDeparture(){
 
         List<Flight> flights = Arrays.asList(
                 // #0 A normal flight
@@ -35,21 +35,25 @@ public class FlightFilterTest {
                         dateTime.plusHours(3), dateTime.plusHours(4),
                         dateTime.plusHours(6), dateTime.plusHours(7)));
 
-        List<Flight> moreCaseActual = FlightFilter.excludeByDeparture(flights, dateTime, ComparisonNumber.MORE);
-        List<Flight> lessCaseActual = FlightFilter.excludeByDeparture(flights, dateTime, ComparisonNumber.LESS);
-        List<Flight> equallyCaseActual = FlightFilter.excludeByDeparture(flights, dateTime, ComparisonNumber.EQUALLY);
+
+
+   
+        List<Flight> moreCaseActual = new DepartureTimeFilter().isAfter(flights, dateTime);
+        List<Flight> lessCaseActual = new DepartureTimeFilter().isBefore(flights, dateTime);
+        List<Flight> equallyCaseActual = new DepartureTimeFilter().isEqual(flights, dateTime);
 
         List<Flight> moreCaseExpected = makeReferenceArray(flights, new int[] { 0, 1, 3, 4 });
         List<Flight> lessCaseExpected = makeReferenceArray(flights, new int[] { 0, 2, 3, 5 });
         List<Flight> equallyCaseExpected = makeReferenceArray(flights, new int[] { 1, 2, 4, 5 });
 
-        assertEquals(moreCaseExpected, moreCaseActual);
+
         assertEquals(lessCaseExpected, lessCaseActual);
+        assertEquals(moreCaseExpected, moreCaseActual);
         assertEquals(equallyCaseExpected, equallyCaseActual);
     }
 
     @Test
-    public void excludeIncorrectSegments(){
+    public void filterIncorrectSegments(){
 
         List<Flight> flights = Arrays.asList(
                 // #0 A normal flight
@@ -73,14 +77,14 @@ public class FlightFilterTest {
                         dateTime.plusHours(3), dateTime.plusHours(4),
                         dateTime.plusHours(6), dateTime.plusHours(5)));
 
-        List<Flight> correctFlightsActual = FlightFilter.excludeIncorrectSegments(flights);
+        List<Flight> correctFlightsActual = new SegmentsFilter().IncorrectSegmentsFilter(flights);
         List<Flight> correctFlightsExpected = makeReferenceArray(flights, new int[] { 0, 2});
 
         assertEquals(correctFlightsExpected, correctFlightsActual);
     }
 
     @Test
-    public void excludeSumInterval(){
+    public void filterSumInterval(){
 
         List<Flight> flights = Arrays.asList(
                 // #0 A normal flight
@@ -124,9 +128,9 @@ public class FlightFilterTest {
 
 
 
-        List<Flight> moreCaseActual = FlightFilter.excludeSumInterval(flights, 120, ComparisonNumber.MORE);
-        List<Flight> lessCaseActual = FlightFilter.excludeSumInterval(flights, 120, ComparisonNumber.LESS);
-        List<Flight> equallyCaseActual = FlightFilter.excludeSumInterval(flights, 120, ComparisonNumber.EQUALLY);
+        List<Flight> moreCaseActual = new TransferTimeFilter().MoreThan(flights, 120);
+        List<Flight> lessCaseActual = new TransferTimeFilter().LessThan(flights, 120);
+        List<Flight> equallyCaseActual = new TransferTimeFilter().Equal(flights, 120);
 
         List<Flight> moreCaseExpected = makeReferenceArray(flights, new int[] { 0, 1, 2, 4, 5, 8, 9});
         List<Flight> lessCaseExpected = makeReferenceArray(flights, new int[] { 0, 2, 3, 4, 5, 6, 7});
@@ -154,10 +158,10 @@ public class FlightFilterTest {
     }
 
     /**
-     * <p>Создает эталонный список полётов по заданным параметрам.</p>
+     * Создает список полётов по заданным параметрам
      *
      * @param flights - исходный список полётов
-     * @param indices - массив с индексами элементов, которые необходимо взять из списка flights и поместить в эталонный
+     * @param indices - массив с индексами элементов, которые необходимо взять из списка flightsю
      */
     private List<Flight> makeReferenceArray(List<Flight> flights, int[] indices){
         List<Flight> referenceArr = new ArrayList<>();
